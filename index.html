@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Line 5 Map</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <!-- Local MapLibre CSS -->
+  <link href="maplibre-gl.css" rel="stylesheet" />
+
+  <!-- Optional basic styling -->
+  <style>
+    body { margin: 0; padding: 0; }
+    #map { position: absolute; top: 0; bottom: 0; width: 100%; }
+  </style>
+
+  <style>
+    .maplibregl-popup {
+        max-width: 400px;
+        font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+    }
+</style>
+
+</head>
+<body>
+
+<!-- Map container -->
+<div id="map"></div>
+
+<!-- Local MapLibre and PMTiles JS -->
+<script src="maplibre-gl.js"></script>
+<script src="pmtiles.js"></script>
+
+<script type="module">
+  import { Protocol } from "./pmtiles.js";
+
+  // Register pmtiles protocol
+  const protocol = new Protocol();
+  maplibregl.addProtocol("pmtiles", protocol.tile);
+
+  const map = new maplibregl.Map({
+    container: "map",
+    style: "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json",
+    center: [-85.71, 46.0],
+    zoom: 6
+  });
+
+  map.on("style.load", () => {
+    // Add vector tile source from pmtiles
+    map.addSource("line5", {
+      type: "vector",
+      url: "pmtiles://line5.pmtiles"
+      // promoteId: "id" // uncomment if you have unique IDs
+    });
+
+    // Add line layer
+    map.addLayer({
+      id: "line5-layer",
+      type: "line",
+      source: "line5",
+      "source-layer": "line5",
+      paint: {
+        "line-color": "red",
+        "line-width": 2
+      }
+    });
+
+    // Hover effect: increase line width on mousemove
+    map.on("mousemove", "line5-layer", () => {
+      map.setPaintProperty("line5-layer", "line-width", 4);
+      map.getCanvas().style.cursor = "pointer";
+    });
+
+    // Reset on mouse leave
+    map.on("mouseleave", "line5-layer", () => {
+      map.setPaintProperty("line5-layer", "line-width", 2);
+      map.getCanvas().style.cursor = "";
+    });
+  });
+</script>
+
+
+</body>
+</html>
+
+
