@@ -1,0 +1,20 @@
+{
+"type": "FeatureCollection",
+"name": "terminals",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "id": 1, "Name": "Hardisty Terminal", "Capacity": "13000000", "Products": "Crude" }, "geometry": { "type": "Point", "coordinates": [ -111.277955915272074, 52.639526602260801 ] } },
+{ "type": "Feature", "properties": { "id": 1, "Name": "Edmonton Terminal", "Capacity": "10000000", "Products": "Crude" }, "geometry": { "type": "Point", "coordinates": [ -113.356199773840459, 53.541685870134131 ] } },
+{ "type": "Feature", "properties": { "id": 1, "Name": "Kerrobert Terminal", "Capacity": "318000", "Products": "Crude" }, "geometry": { "type": "Point", "coordinates": [ -109.03718092872812, 51.870615234609062 ] } },
+{ "type": "Feature", "properties": { "id": 1, "Name": "Regina Terminal", "Capacity": "839000", "Products": "Light,  Medium,  and Heavy Crude" }, "geometry": { "type": "Point", "coordinates": [ -104.588518798132711, 50.473229608124669 ] } },
+{ "type": "Feature", "properties": { "id": 1, "Name": "Cromer Terminal", "Capacity": "2400000", "Products": "Light and Medium Crude" }, "geometry": { "type": "Point", "coordinates": [ -101.24104252518066, 49.752662859908249 ] } },
+{ "type": "Feature", "properties": { "id": 1, "Name": "Gretna Terminal", "Capacity": "335000", "Products": "Refined Products" }, "geometry": { "type": "Point", "coordinates": [ -97.556785245627879, 49.017265842093359 ] } },
+{ "type": "Feature", "properties": { "id": 1, "Name": "Clearbrook Terminal", "Capacity": "1300000", "Products": "Light,  Medium,  and Heavy Crude" }, "geometry": { "type": "Point", "coordinates": [ -95.411639686550842, 47.689697475435381 ] } },
+{ "type": "Feature", "properties": { "id": 1, "Name": "Superior Terminal", "Capacity": "12000000", "Products": "Light,  medium,  and heavy crude" }, "geometry": { "type": "Point", "coordinates": [ -92.061600192806864, 46.687882086429482 ] } },
+{ "type": "Feature", "properties": { "id": 1, "Name": "Hartsdale Terminal", "Capacity": "1500000", "Products": "Light, medium,  and heavy crude" }, "geometry": { "type": "Point", "coordinates": [ -87.450095744490994, 41.50926501194413 ] } },
+{ "type": "Feature", "properties": { "id": 1, "Name": "Griffith Terminal", "Capacity": "2800000", "Products": "Light,  medium,  and heavy crude" }, "geometry": null },
+{ "type": "Feature", "properties": { "id": 1, "Name": "Stockbridge Terminal", "Capacity": "2700000", "Products": "Light,  medium,  and heavy crude" }, "geometry": { "type": "Point", "coordinates": [ -84.238724038826689, 42.510464542599131 ] } },
+{ "type": "Feature", "properties": { "id": 1, "Name": "Westover Terminal", "Capacity": "900000", "Products": "Light,  medium,  and heavy crude" }, "geometry": { "type": "Point", "coordinates": [ -80.091088851006589, 43.328598085576388 ] } },
+{ "type": "Feature", "properties": { "id": 1, "Name": "Montreal Terminal", "Capacity": "None", "Products": "Light,  medium,  and heavy crude" }, "geometry": { "type": "Point", "coordinates": [ -73.533108927993652, 45.633681477988425 ] } }
+]
+}
