@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Line 5</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <link href="../libraries/maplibre-gl.css" rel="stylesheet" />
+
+   <style>
+    body { margin: 0; padding: 0; }
+    #map { position: absolute; top: 0; bottom: 0; width: 100%; }
+    .maplibregl-popup {
+      max-width: 400px;
+      font: 12px/20px 'Helvetica Neue', Arial, Helvetica, sans-serif;
+    }
+
+  .maplibregl-popup {
+  max-width: 400px;
+  font-family: 'Bai Jamjuree', monospace; 
+  font-weight: 300;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #000; 
+  border-radius: 6px;
+  border-left: 4px solid #ff0000; 
+  padding: 10px 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  background-color: #fff;
+}
+
+.maplibregl-popup strong {
+  font-family: 'Arial Black', Gadget, sans-serif; 
+  font-weight: 900;
+  color: #ff0000; 
+}
+
+.maplibregl-popup ul {
+  margin: 6px 0 0 0;
+  padding-left: 16px;
+}
+
+.maplibregl-popup li {
+  margin-bottom: 4px;
+}
+  </style>
+</head>
+<body>
+
+<div id="map"></div>
+
+<script src="../libraries/maplibre-gl.js"></script>
+<script type="module" src="../libraries/pmtiles.js"></script>
+
+
+<script type="module">
+  import * as PMTiles from '../libraries/pmtiles.js';
+
+  const protocol = new PMTiles.Protocol();
+  maplibregl.addProtocol("pmtiles", protocol.tile);
+
+  const map = new maplibregl.Map({
+    container: "map",
+    style: "https://basemaps.cartocdn.com/gl/positron-gl-style/style.json",
+    center: [-85.71, 46.0],
+    zoom: 6
+  });
+
+  map.on("style.load", () => {
+    map.addSource("line5", {
+      type: "vector",
+      url: "pmtiles://../data/pmtiles/line5.pmtiles"
+    });
+
+    map.addLayer({
+      id: "line5-layer",
+      type: "line",
+      source: "line5",     
+      "source-layer": "5",  
+      paint: { "line-color": "red", "line-width": 2 }
+    });
+
+map.addLayer({
+  id: "line5-hitbox",
+  type: "line",
+  source: "line5",
+  "source-layer": "5",
+  paint: {
+    "line-color": "rgba(0,0,0,0.01)", 
+    "line-width": 30 
+  }
+});
+
+map.on("click", "line5-hitbox", (e) => {
+  if (e.features && e.features.length > 0) {
+    const feature = e.features[0];
+    const props = feature.properties;
+
+    let html = `<div class="popup-content"><strong>Feature Properties</strong><ul>`;
+for (const key in props) {
+  if (key.toLowerCase() !== "id") {  
+    html += `<li><strong>${key}:</strong> ${props[key]}</li>`;
+  }
+}
+html += `</ul></div>`;
+
+    new maplibregl.Popup({ closeButton: true, closeOnClick: true })
+      .setLngLat(e.lngLat)
+      .setHTML(html)
+      .addTo(map);
+  }
+});
+
+map.on("mousemove", "line5-hitbox", () => {
+  map.setPaintProperty("line5-layer", "line-width", 4);
+  map.getCanvas().style.cursor = "pointer";
+});
+
+map.on("mouseleave", "line5-hitbox", () => {
+  map.setPaintProperty("line5-layer", "line-width", 2);
+  map.getCanvas().style.cursor = "";
+});
+
+});
+</script>
+
+</body>
+</html>
+
+
