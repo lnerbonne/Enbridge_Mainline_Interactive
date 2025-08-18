@@ -69,9 +69,7 @@
 
   const map = new maplibregl.Map({
     container: "map",
-    style: baseStyle,
-    center: [-85.71, 46.0],
-    zoom: 6
+    style: baseStyle
   });
 
   map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-left');
@@ -121,6 +119,20 @@
       map.getCanvas().style.cursor = "";
     });
   }
+
+  map.once("idle", () => {
+      const features = map.querySourceFeatures("line5", { sourceLayer: "5" });
+      if (features.length > 0) {
+        const bounds = new maplibregl.LngLatBounds();
+        features.forEach(f => {
+          const coords = f.geometry.coordinates.flat(Infinity);
+          for (let i = 0; i < coords.length; i += 2) {
+            bounds.extend([coords[i], coords[i + 1]]);
+          }
+        });
+        map.fitBounds(bounds, { padding: 50, duration: 0});
+      }
+    });
 
   function onClickLine5(e) {
     if (e.features && e.features.length > 0) {
