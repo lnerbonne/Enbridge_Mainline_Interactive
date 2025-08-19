@@ -89,7 +89,8 @@
 
   const map = new maplibregl.Map({
     container: "map",
-    style: baseStyle
+    style: baseStyle,
+    scrollZoom: false
   });
 
   map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-left');
