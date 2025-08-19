@@ -118,6 +118,21 @@
     });
   }
 
+  map.once("idle", () => {
+      const features = map.querySourceFeatures("line78", { sourceLayer: "78" });
+      if (features.length > 0) {
+        const bounds = new maplibregl.LngLatBounds();
+        features.forEach(f => {
+          const coords = f.geometry.coordinates.flat(Infinity);
+          for (let i = 0; i < coords.length; i += 2) {
+            bounds.extend([coords[i], coords[i + 1]]);
+          }
+        });
+        map.fitBounds(bounds, { padding: 50, duration: 0});
+      }
+    });
+  
+
   function onClickLine78(e) {
     if (e.features && e.features.length > 0) {
       const props = e.features[0].properties;
