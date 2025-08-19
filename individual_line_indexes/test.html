@@ -3,13 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <title>Enbridge Mainline Map</title>
-  <meta name="viewport" content="width=device-width, in      features.forEach((f, i) => {
-      const label = f.properties.Name || `Line ${f.properties.Line || (i + 1)}`;
-      html += `<button 
-                data-feature-index="${i}"
-                class="feature-select-button">
-                ${label}
-              </button>`;le=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
   <link href="../libraries/maplibre-gl.css" rel="stylesheet" />
 
@@ -53,20 +47,6 @@
     .maplibregl-ctrl-group {
       transform: scale(1.5);
       transform-origin: top left;
-    }
-
-    .feature-select-button {
-      width: 100%;
-      margin: 3px 0;
-      padding: 8px;
-      background: #f8f8f8;
-      border: 1px solid #ddd;
-      border-radius: 4px;
-      cursor: pointer;
-      text-align: left;
-      font-family: 'Arial Black', Gadget, sans-serif;
-      font-weight: 900;
-      color: #000000;
     }
   </style>
 </head>
@@ -185,10 +165,7 @@
                 data-feature-index="${i}"
                 style="width:100%; margin:3px 0; padding:8px; 
                 background:#f8f8f8; border:1px solid #ddd; 
-                border-radius:4px; cursor:pointer; text-align:left;
-                font-family: 'Arial Black', Gadget, sans-serif;
-                font-weight: 900;
-                color: #ff0000">
+                border-radius:4px; cursor:pointer; text-align:left;">
                 ${label}
               </button>`;
     });
