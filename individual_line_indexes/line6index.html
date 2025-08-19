@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Line 5 Map</title>
+  <title>Line 6 Map</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
   <link href="../libraries/maplibre-gl.css" rel="stylesheet" />
@@ -74,52 +74,52 @@
 
   map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-left');
 
-  function addLine5() {
-    if (!map.getSource("line5")) {
-      map.addSource("line5", {
+  function addLine6() {
+    if (!map.getSource("line6")) {
+      map.addSource("line6", {
         type: "vector",
-        url: "pmtiles://../data/pmtiles/line5.pmtiles"
+        url: "pmtiles://../data/pmtiles/line6.pmtiles"
       });
     }
 
-    if (!map.getLayer("line5-layer")) {
+    if (!map.getLayer("line6-layer")) {
       map.addLayer({
-        id: "line5-layer",
+        id: "line6-layer",
         type: "line",
-        source: "line5",
-        "source-layer": "5",
+        source: "line6",
+        "source-layer": "6",
         paint: { "line-color": "red", "line-width": 2 }
       });
     }
 
-    if (!map.getLayer("line5-hitbox")) {
+    if (!map.getLayer("line6-hitbox")) {
       map.addLayer({
-        id: "line5-hitbox",
+        id: "line6-hitbox",
         type: "line",
-        source: "line5",
-        "source-layer": "5",
+        source: "line6",
+        "source-layer": "6",
         paint: { "line-color": "rgba(0,0,0,0.01)", "line-width": 30 }
       });
     }
 
-    map.off("click", "line5-hitbox", onClickLine5);
-    map.on("click", "line5-hitbox", onClickLine5);
+    map.off("click", "line6-hitbox", onClickLine6);
+    map.on("click", "line6-hitbox", onClickLine6);
 
-    map.off("mousemove", "line5-hitbox");
-    map.on("mousemove", "line5-hitbox", () => {
-      map.setPaintProperty("line5-layer", "line-width", 4);
+    map.off("mousemove", "line6-hitbox");
+    map.on("mousemove", "line6-hitbox", () => {
+      map.setPaintProperty("line6-layer", "line-width", 8);
       map.getCanvas().style.cursor = "pointer";
     });
 
-    map.off("mouseleave", "line5-hitbox");
-    map.on("mouseleave", "line5-hitbox", () => {
-      map.setPaintProperty("line5-layer", "line-width", 2);
+    map.off("mouseleave", "line6-hitbox");
+    map.on("mouseleave", "line6-hitbox", () => {
+      map.setPaintProperty("line6-layer", "line-width", 2);
       map.getCanvas().style.cursor = "";
     });
   }
 
   map.once("idle", () => {
-      const features = map.querySourceFeatures("line5", { sourceLayer: "5" });
+      const features = map.querySourceFeatures("line6", { sourceLayer: "6" });
       if (features.length > 0) {
         const bounds = new maplibregl.LngLatBounds();
         features.forEach(f => {
@@ -131,23 +131,24 @@
         map.fitBounds(bounds, { padding: 50, duration: 0});
       }
     });
+  
 
-  function onClickLine5(e) {
+  function onClickLine6(e) {
     if (e.features && e.features.length > 0) {
       const props = e.features[0].properties;
       let html = `<div class="popup-content"><ul>`;
-for (const key in props) {
-  if (key.toLowerCase() !== "id") {
-    html += `<li><strong>${key}:</strong> ${props[key]}</li>`;
-  }
-}
-html += `</ul></div>`;
+      for (const key in props) {
+        if (key.toLowerCase() !== "id") {
+          html += `<li><strong>${key}:</strong> ${props[key]}</li>`;
+        }
+      }
+      html += `</ul></div>`;
 
       new maplibregl.Popup({ closeButton: true, closeOnClick: true, offset: { 
-        'top': [100, 50],    // moves top popups right 100px, down 50px
-        'bottom': [100, -50], // moves bottom popups right 100px, up 50px
-        'left': [150, 0],     // moves left popups further right 150px
-        'right': [50, 0]      // moves right popups slightly right 50px
+        'top': [100, 50],
+        'bottom': [100, -50],
+        'left': [150, 0],
+        'right': [50, 0]
       } })
         .setLngLat(e.lngLat)
         .setHTML(html)
@@ -155,16 +156,15 @@ html += `</ul></div>`;
     }
   }
 
-  map.on("load", addLine5);
+  map.on("load", addLine6);
 
   const toggleButton = document.getElementById("basemap-toggle");
   toggleButton.onclick = () => {
     const current = map.getStyle().sprite.includes("cartocdn") ? satelliteStyle : baseStyle;
     map.setStyle(current);
-    map.once("styledata", () => setTimeout(addLine5, 200));
+    map.once("styledata", () => setTimeout(addLine6, 200));
   };
 </script>
 
 </body>
 </html>
-

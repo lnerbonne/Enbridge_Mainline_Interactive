@@ -74,7 +74,6 @@
 
   map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-left');
 
-  // Function to add Line 4 layers and popups
   function addLine4() {
     if (!map.getSource("line4")) {
       map.addSource("line4", {
@@ -103,7 +102,6 @@
       });
     }
 
-    // Remove previous click handlers to avoid duplicates
     map.off("click", "line4-hitbox", onClickLine4);
     map.on("click", "line4-hitbox", onClickLine4);
 
@@ -158,10 +156,8 @@
     }
   }
 
-  // Initial load
   map.on("load", addLine4);
 
-  // Basemap toggle
   const toggleButton = document.getElementById("basemap-toggle");
   toggleButton.onclick = () => {
     const current = map.getStyle().sprite.includes("cartocdn") ? satelliteStyle : baseStyle;
