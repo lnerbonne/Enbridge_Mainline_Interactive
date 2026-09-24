@@ -3,13 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <title>Enbridge Mainline Map</title>
-  <meta name="viewport" content="width=device-width, in      features.forEach((f, i) => {
-      const label = f.properties.Name || `Line ${f.properties.Line || (i + 1)}`;
-      html += `<button 
-                data-feature-index="${i}"
-                class="feature-select-button">
-                ${label}
-              </button>`;le=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   
   <link href="../libraries/maplibre-gl.css" rel="stylesheet" />
 
@@ -55,6 +49,16 @@
       transform-origin: top left;
     }
 
+    .corridor-note {
+      margin: 10px 0 0 0;
+      padding: 8px 10px;
+      background: #fff4f4;
+      border-left: 3px solid #ff0000;
+      font-size: 12px;
+      font-style: italic;
+      line-height: 1.4;
+    }
+
     .feature-select-button {
       width: 100%;
       margin: 3px 0;
@@ -90,21 +94,45 @@
   const map = new maplibregl.Map({
     container: "map",
     style: baseStyle,
-    scrollZoom: false
+    cooperativeGestures: true
   });
 
   map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-left');
 
-  // Define all line numbers
   const lineNumbers = ['1', '2', '3', '4', '5', '6', '7', '11', '14_64', '61', '62', '65', '67', '78'];
   let currentPopup = null;
+
+  const SHARED_CORRIDOR_NOTE =
+    "Between Clearbrook, MN and Superior, WI, Lines 1, 2, 4 and 67 run in a semi-shared corridor. " +
+    "State pipeline databases don't allow precise identification of lines, so all four are mapped as a single feature.";
+  const HIDDEN_PROPS = ["id", "sharedcorridor"];
+
+  let selectedLine = null;
+
+  function setLineHighlight(lineNum, on) {
+    const opacity = on ? 1 : 0;
+    if (map.getLayer(`line${lineNum}-glow`)) map.setPaintProperty(`line${lineNum}-glow`, "line-opacity", opacity);
+    if (map.getLayer(`line${lineNum}-hover`)) map.setPaintProperty(`line${lineNum}-hover`, "line-opacity", opacity);
+  }
+
+  function selectLine(lineNum) {
+    if (selectedLine && selectedLine !== lineNum) setLineHighlight(selectedLine, false);
+    selectedLine = lineNum;
+    if (lineNum) setLineHighlight(lineNum, true);
+  }
+
+  const lineNumOf = (feature) => feature.layer.id.replace(/^line/, "").replace(/-hitbox$/, "");
+  const boundLines = new Set();
 
   function addLine(lineNum) {
     const sourceId = `line${lineNum}`;
     const layerId = `line${lineNum}-layer`;
     const hitboxId = `line${lineNum}-hitbox`;
+    const smoothId = `line${lineNum}-smooth`;
+    const glowId = `line${lineNum}-glow`;
+    const hoverId = `line${lineNum}-hover`;
+    const HOVER_SWITCH_ZOOM = 7;
 
-    // Add source if it doesn't exist
     if (!map.getSource(sourceId)) {
       map.addSource(sourceId, {
         type: "vector",
@@ -112,13 +140,35 @@
       });
     }
 
-    // Add visible line layer
+    if (!map.getSource(smoothId)) {
+      map.addSource(smoothId, {
+        type: "geojson",
+        data: `../data/geojson_smooth/${lineNum}.geojson`
+      });
+    }
+
+    if (!map.getLayer(glowId)) {
+      map.addLayer({
+        id: glowId,
+        type: "line",
+        source: smoothId,
+        maxzoom: HOVER_SWITCH_ZOOM,
+        layout: { "line-join": "round", "line-cap": "round" },
+        paint: {
+          "line-color": "red",
+          "line-width": 8,
+          "line-opacity": 0
+        }
+      });
+    }
+
     if (!map.getLayer(layerId)) {
       map.addLayer({
         id: layerId,
         type: "line",
         source: sourceId,
         "source-layer": lineNum,
+        layout: { "line-join": "round", "line-cap": "round" },
         paint: { 
           "line-color": "red",
           "line-width": 2
@@ -126,7 +176,6 @@
       });
     }
 
-    // Add invisible wider hitbox for better interaction
     if (!map.getLayer(hitboxId)) {
       map.addLayer({
         id: hitboxId,
@@ -140,26 +189,45 @@
       });
     }
 
-    // Add hover effect
+    if (!map.getLayer(hoverId)) {
+      map.addLayer({
+        id: hoverId,
+        type: "line",
+        source: sourceId,
+        "source-layer": lineNum,
+        minzoom: HOVER_SWITCH_ZOOM,
+        layout: { "line-join": "round", "line-cap": "round" },
+        paint: {
+          "line-color": "red",
+          "line-width": 8,
+          "line-opacity": 0
+        }
+      }, hitboxId);
+    }
+
+    map.moveLayer(glowId, hitboxId);
+
+    if (selectedLine === lineNum) setLineHighlight(lineNum, true);
+
+    if (boundLines.has(lineNum)) return;
+    boundLines.add(lineNum);
+
     map.on("mousemove", hitboxId, () => {
-      map.setPaintProperty(layerId, "line-width", 8);
+      setLineHighlight(lineNum, true);
       map.getCanvas().style.cursor = "pointer";
     });
 
     map.on("mouseleave", hitboxId, () => {
-      map.setPaintProperty(layerId, "line-width", 2);
+      if (selectedLine !== lineNum) setLineHighlight(lineNum, false);
       map.getCanvas().style.cursor = "";
     });
 
-    // Add click handler
     map.on("click", hitboxId, (e) => {
       if (e.features && e.features.length > 0) {
-        // Get all features at the clicked point from all layers
         const features = lineNumbers.reduce((allFeatures, lineNum) => {
           const layerFeatures = map.queryRenderedFeatures(e.point, {
             layers: [`line${lineNum}-hitbox`]
           });
-          // Only take the first feature from each line (since they're identical)
           return layerFeatures.length > 0 ? 
             [...allFeatures, layerFeatures[0]] : 
             allFeatures;
@@ -194,14 +262,17 @@
               </button>`;
     });
 
-    html += `</div></div>`;
+    html += `</div>`;
+    if (features.some(f => f.properties.SharedCorridor == 1)) {
+      html += `<p class="corridor-note">${SHARED_CORRIDOR_NOTE}</p>`;
+    }
+    html += `</div>`;
 
     currentPopup = new maplibregl.Popup({ closeButton: true, closeOnClick: true })
       .setLngLat(lngLat)
       .setHTML(html)
       .addTo(map);
 
-    // Add click handlers after popup is added to DOM
     const container = document.getElementById('feature-list');
     if (container) {
       container.addEventListener('click', (event) => {
@@ -223,19 +294,21 @@
                   <ul style="margin-top:10px;">`;
     
     for (const key in props) {
-      if (key.toLowerCase() !== "id") {
+      if (!HIDDEN_PROPS.includes(key.toLowerCase())) {
         html += `<li><strong>${key}:</strong> ${props[key]}</li>`;
       }
     }
     
     html += `</ul>`;
 
-    // Only add back button if we have multiple features at this point
+    if (props.SharedCorridor == 1) {
+      html += `<p class="corridor-note">${SHARED_CORRIDOR_NOTE}</p>`;
+    }
+
     const featuresAtPoint = lineNumbers.reduce((allFeatures, lineNum) => {
       const layerFeatures = map.queryRenderedFeatures(map.project(lngLat), {
         layers: [`line${lineNum}-hitbox`]
       });
-      // Only take the first feature from each line (since they're identical)
       return layerFeatures.length > 0 ? 
         [...allFeatures, layerFeatures[0]] : 
         allFeatures;
@@ -258,7 +331,12 @@
       .setHTML(html)
       .addTo(map);
 
-    // Add click handler for back button
+    const thisLine = lineNumOf(feature);
+    selectLine(thisLine);
+    currentPopup.on("close", () => {
+      if (selectedLine === thisLine) selectLine(null);
+    });
+
     const backButton = document.getElementById('back-to-list');
     if (backButton) {
       backButton.addEventListener('click', () => {
@@ -268,24 +346,20 @@
   }
 
   map.on("load", () => {
-    // Add all lines
     lineNumbers.forEach(addLine);
 
-    // Set initial bounds to show Edmonton to Toronto
     const bounds = new maplibregl.LngLatBounds(
-      [-113.5234, 43.6532],  // Southwest (Edmonton area)
-      [-79.3832, 53.5461]    // Northeast (Toronto area)
+      [-113.5234, 43.6532],
+      [-79.3832, 53.5461]
     );
     map.fitBounds(bounds, { padding: 50, duration: 0 });
   });
 
-  // Handle basemap toggle
   const toggleButton = document.getElementById("basemap-toggle");
   toggleButton.onclick = () => {
     const current = map.getStyle().sprite.includes("cartocdn") ? satelliteStyle : baseStyle;
     map.setStyle(current);
     map.once("styledata", () => {
-      // Re-add all lines after style change
       lineNumbers.forEach(addLine);
     });
   };
